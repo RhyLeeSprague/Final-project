@@ -1,0 +1,83 @@
+/* File: Journaling.css */
+
+/* General Reset */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* Background Styling */
+  .background {
+    
+    background-color: #D2B48C;
+    background-size: cover;
+    background-position: center;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  
+  /* Header Styling */
+  .header {
+    text-align: center;
+    color: #202623;
+    margin-bottom: 20px;
+  }
+  
+  .header h1 {
+    font-size: 2.5em;
+    margin: 0;
+  }
+  
+  /* Cards Section */
+  .card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .card {
+    background-color: #Edeade;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 250px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s;
+  }
+  
+  .card:hover {
+    transform: scale(1.05);
+  }
+  
+  .card i {
+    font-size: 2em;
+    color: #eeeae0;
+    margin-bottom: 10px;
+  }
+  
+  .card p {
+    font-size: 1.2em;
+    color: #202623;
+    margin: 0;
+  }
+  
+  /* Quote Section */
+  .quote-section {
+    margin-top: 40px;
+    text-align: center;
+    color: #202623;
+    font-style: italic;
+  }
+  
+  .quote-section p {
+    margin: 0 0 10px 0;
+    font-size: 1.2em;
+  }
+  
+  .quote-section .author {
+    font-weight: bold;
+    font-size: 1em;
+    color: #202623;
+  }

@@ -1,6 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { Sequelize, Model, DataTypes } = require('sequelize');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = 'wildcard'
 
 const app = express();
 const port = 3000;
@@ -18,6 +21,44 @@ User.init({
   email: DataTypes.STRING,
   password: DataTypes.STRING
 }, { sequelize, modelName: 'user' });
+
+// Function to generate JWT token
+const generateToken = (userId) => {
+  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '1h'});
+};
+
+// Function to verify JWT token
+const verifyToken = (token) => {
+  return jwt.verify(token, JWT_SECRET);
+};
+
+const authenticateToken = (req, res, next) => {
+  const token = req.header('Authorization')?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ message: 'Access Denied, No Token Provided'});
+  }
+  try {
+    const decoded = verifyToken(token);
+    req.userId = decoded.userId; // Add userId to the request object
+    next(); // proceed to the next middleware or route handler
+  }
+  catch (err) {
+    return res.status(403).json({ message: 'Invalid or Expired Token'});
+  }
+};
+
+// Password Hashing before it saves to the database
+User.beforeCreate(async (user) => {
+  if (user.password) {
+    console.log('Hashing password for user:', user.email);
+    user.password = await bcrypt.hash(user.password, 10); // Password = Hashed
+  }
+});
+
+User.prototype.validatePassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
 
 // Define MoodTracker model
 class MoodTracker extends Model {}
@@ -48,9 +89,9 @@ sequelize.sync().then(async () => {
     const count = await User.count();
         if (count === 0) {
             await User.bulkCreate([
-            { name: 'John Doe', email: 'johndoe@example.com', password: 'password123' },
-            { name: 'Jane Smith', email: 'janesmith@example.com', password: 'mypassword456' },
-            { name: 'Alice Johnson', email: 'alice.johnson@example.com', password: 'alicepassword789' }
+            { name: 'John Doe', email: 'johndoe@example.com', password: 'password012' },
+            { name: 'Jane Smith', email: 'janesmith@example.com', password: 'mypassword345' },
+            { name: 'Alice Johnson', email: 'alicejohnson@example.com', password: 'alicepassword678' }
             ]);
             console.log('Sample users created!');
         }
@@ -137,10 +178,10 @@ app.get('/moodtrackers', async (req, res) => {
     }
   });
   
-  app.post('/moodtrackers', async (req, res) => {
-    const { mood, journalEntry, date, userId } = req.body;
-    const moodtracker = await MoodTracker.create({ mood, journalEntry, date, userId });
-    res.json(moodtracker);
+  app.post('/moodtrackers', authenticateToken, async (req, res) => {
+    const { mood, journalEntry, date } = req.body;
+    const moodtracker = await MoodTracker.create({ mood, journalEntry, date, userId: req.userId }); // Assigns moodtracker to logged-in user
+    res.status(201).json(moodtracker);
   });
   
   app.put('/moodtrackers/:id', async (req, res) => {
@@ -178,10 +219,10 @@ app.get('/tasks', async (req, res) => {
     }
   });
   
-  app.post('/tasks', async (req, res) => {
-    const { task, dateCreated, timelineForCompletion, userId } = req.body;
-    const newTask = await Task.create({ task, dateCreated, timelineForCompletion, userId });
-    res.json(newTask);
+  app.post('/tasks', authenticateToken, async (req, res) => {
+    const { task, dateCreated, timelineForCompletion} = req.body;
+    const newTask = await Task.create({ task, dateCreated, timelineForCompletion, userId: req.userId }); // Assigns task to logged-in user
+    res.status(201).json(newTask);
   });
   
   app.put('/tasks/:id', async (req, res) => {
@@ -203,7 +244,73 @@ app.get('/tasks', async (req, res) => {
       res.status(404).json({ message: 'Task entry not found' });
     }
   });
-  
+
+// Register route
+app.post('/register', async (req, res) => {
+  try {
+  const {name, email, password} = req.body;
+
+  // Debugging input
+  console.log('Request body:', req.body);
+
+  // Validate input
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: 'All fields (name, email, password) are required'});
+  }
+
+  // Checks for existing user
+  const existingUser = await User.findOne({ where: { email: email || ''} });
+  console.log('Existing user:', existingUser);
+  if (existingUser) {
+    return res.status(400).json({ message: 'Email already in use'});
+  }
+
+  // Create a new user
+  const newUser = await User.create({name, email, password});
+
+  // Send a success response (A token return could be used if needed here)
+  res.status(201).json({ message: 'User registered successfully', userId: newUser.id });
+} catch (err) {
+  console.error('Error in /register:', err);
+  res.status(500).json({ message: 'Internal server error'});
+}
+});
+
+// Login route
+app.post('/login', async (req, res) => {
+  const {email, password} = req.body;
+
+  // Log the incoming credentials for debugging
+  console.log('Login attempt with email:', email);
+
+  // User search by email
+  const user = await User.findOne({ where: {email} });
+  if (!user) {
+    console.log('User not found:', email);
+    return res.status(400).json({ message: 'User not found'});
+  }
+
+  // Validate Password
+  const isPasswordValid = await user.validatePassword(password);
+  console.log('Password valid:', isPasswordValid); // Log the password validation result
+  if (!isPasswordValid) {
+    return res.status(400).json({ message: 'Invalid credentials please ReEnter'});
+  }
+
+  // Generate JWT token and send it back
+  const token = generateToken(user.id);
+  res.json({ message: 'Login successful', token});
+});
+
+// Protected Route: Profile (Only accessible if logged-in)
+app.get('/profile', authenticateToken, async (req, res) => {
+  const user = await User.findByPk(req.userId); // Get the user based on decoded JWT userId
+  if (!user) {
+    return res.status(404).json({ message: 'User not found'});
+  }
+  res.json({ name: user.name, email: user.email});
+});
+
 
 // Start server
 app.listen(port, () => {

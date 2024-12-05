@@ -1,36 +1,46 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
+// Page Components
+import Journaling from "./Journaling";
+import JournalEntry from "./pages/JournalEntry";
+import TaskTracker from "./pages/TaskTracker";
+import Moods from "./pages/Moods";
+import EntryTracker from "./pages/EntryTracker";
+import Void from "./pages/Void";
+
+// Import JournalProvider
+import { JournalProvider } from "./JournalContext";
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+    <JournalProvider>
+      <Router>
+      <Routes>
+        <Route path="/" element={<Journaling />} />
+        <Route path="/journal-entry" element={<JournalEntry />} />
+        <Route path="/task-tracker" element={<TaskTracker />} />
+        <Route path="/moods" element={<Moods />} />
+        <Route path="/entry-tracker" element={<EntryTracker />} />
+        <Route path="/void" element={<Void />} />
+      </Routes>
+    </Router>
+    </JournalProvider>
     </>
   )
 }
 
 export default App
+
+
+/*     <div>
+<a href="https://vitejs.dev" target="_blank">
+<img src={"https://journeytojoy.tv/WordPress/wp-content/uploads/2023/10/Emotion-XP_Moods_FeelingsWheel_XP3MS.jpg"} className="logo" alt="Vite logo" />
+</a>
+</div>
+*/
