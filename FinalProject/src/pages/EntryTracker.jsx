@@ -1,91 +1,122 @@
-import React, { useState, useEffect } from "react";
-import FullCalendar from "@fullcalendar/react"; // Import FullCalendar
-import dayGridPlugin from "@fullcalendar/daygrid"; // Import day grid plugin
-import Chart from "chart.js/auto"; // Import Chart.js
+import React, { useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Calendar from 'react-calendar'; // Import react-calendar
+import 'react-calendar/dist/Calendar.css'; // Import calendar styles
+import { JournalContext } from '../JournalContext'; // Import context
 import './PageStyles.css';
-import { JournalContext } from "../JournalContext";
+
+const moodColors = {
+  happy: 'yellow',
+  sad: 'blue',
+  excited: 'red',
+  neutral: 'gray',
+}; // Define mood colors
 
 const EntryTracker = () => {
-    const [chart, setChart] = useState(null);
+  const { journalEntries, setJournalEntries } = useContext(JournalContext); // Access the shared entries
+  const [selectedDate, setSelectedDate] = useState(new Date()); // State for selected date
+  const navigate = useNavigate();
 
-  // Example entries (replace with dynamic data if needed)
-  const entries = [
-    { date: "2024-12-01", mood: "Happy", journal: "I had a great day!" },
-    { date: "2024-12-02", mood: "Sad", journal: "Feeling down today." },
-    { date: "2024-12-03", mood: "Excited", journal: "Looking forward to tomorrow!" },
-  ];
-
-  const moodColors = {
-    Happy: "#FFD700",
-    Sad: "#87CEEB",
-    Excited: "#FF4500",
-    Neutral: "#D3D3D3",
-  };
-
-  // Combine and format data from journal and mood entries
-  const events = [
-    ...journalEntries.map((entry) => ({
-      title: `Journal: ${entry.text}`,
-      start: entry.date,
-      backgroundColor: moodColors[entry.mood] || moodColors.Neutral,
-    })),
-    ...moodEntries.map((entry) => ({
-      title: `Mood: ${entry.mood}`,
-      start: entry.date,
-      backgroundColor: moodColors[entry.mood] || moodColors.Neutral,
-    })),
-  ];
-
+  // Load journal entries from localStorage on mount
   useEffect(() => {
-    // Generate a bar chart for mood overview
-    const ctx = document.getElementById("emotion-graph").getContext("2d");
-    const moodCounts = entries.reduce((acc, entry) => {
-      acc[entry.mood] = (acc[entry.mood] || 0) + 1;
+    const savedEntries = localStorage.getItem("journalEntries");
+    if (savedEntries) {
+      try {
+        const parsedEntries = JSON.parse(savedEntries);
+        if (Array.isArray(parsedEntries)) {
+          setJournalEntries(parsedEntries); // Set journal entries from localStorage
+        }
+      } catch (e) {
+        console.error("Failed to parse journalEntries from localStorage:", e);
+      }
+    }
+  }, [setJournalEntries]);
+
+  // Save journal entries to localStorage on update
+  useEffect(() => {
+    if (journalEntries) {
+    localStorage.setItem('journalEntries', JSON.stringify(journalEntries));
+    }
+  }, [journalEntries]);
+
+  // Filter journal entries for the selected date
+  const filteredEntries = journalEntries.filter((entry) => {
+    const entryDate = new Date(entry.date).toDateString();
+    const selectedDateString = selectedDate.toDateString();
+    return entryDate === selectedDateString;
+  });
+
+  const aggregatedMood = filteredEntries
+    .filter((entry) => entry.type === 'Mood') // Only mood entries
+    .map((entry) => entry.content) // Extract the mood
+    .join(', '); // Combine into a single string (e.g, "Happy, Sad")
+
+  // Group journal entries by date and map moods to colors
+  const entriesByDate = journalEntries
+    .filter((entry) => entry && entry.date) // Ensure entry and date are valid
+    .reduce((acc, entry) => {
+      const date = new Date(entry.date).toDateString();
+      if (!acc[date]) acc[date] = [];
+      if (entry.type === "Mood" && entry.content) acc[date].push(entry.content); // Only include moods
       return acc;
     }, {});
 
-    const chartInstance = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: Object.keys(moodCounts),
-        datasets: [
-          {
-            label: "Mood Count",
-            data: Object.values(moodCounts),
-            backgroundColor: Object.keys(moodCounts).map((mood) => moodColors[mood]),
-            borderWidth: 1,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: { beginAtZero: true },
-        },
-      },
-    });
-
-    setChart(chartInstance);
-
-    return () => {
-      if (chartInstance) chartInstance.destroy(); // Clean up chart instance
-    };
-  }, [moodEntries]);
-
+  // Assign a mood color for each date
+  const getTileClassName = ({ date }) => {
+    const dateString = date.toDateString();
+    const moods = entriesByDate[dateString];
+    if (moods && moods.length > 0) {
+      const dominantMood = moods[0]; // Pick the first mood (or calculate the most common)
+      return `mood-${dominantMood}`;
+    }
+    return ''; // No class if no entries
+  };
 
   return (
     <div className="page-container">
-    <h2>Entry Tracker</h2>
-      <div id="calendar">
-        <FullCalendar
-          plugins={[dayGridPlugin]} // Use day grid plugin
-          initialView="dayGridMonth"
-          events={events} // Add dynamic events
+      <h1>Entry Tracker</h1>
+      <div className="calendar-container">
+        <Calendar
+          onChange={setSelectedDate} // Update selected date
+          value={selectedDate} // Current selected date
+          tileClassName={getTileClassName} // Add class for mood coloring
         />
       </div>
-      <h3>Emotion Overview</h3>
-      <canvas id="emotion-graph" width="400" height="200"></canvas>
+      <h2>Entries for {selectedDate.toDateString()}</h2>
+      <table className="tracker-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Prompt</th>
+            <th>Entry</th>
+            <th>Mood</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredEntries.length > 0 ? (
+            filteredEntries.filter((entry) => entry.type !== 'Mood') // Exclude mood-only rows
+            .map((entry, index) => (
+              <tr key={index}>
+                <td>{entry.date ? new Date(entry.date).toLocaleTimeString() : "N/A"}</td>
+                <td>{entry.prompt || "N/A"}</td>
+                <td>{entry.text || entry.content || "N/A"}</td>
+                <td>{aggregatedMood || "N/A"}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="4">No entries for this date</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+      <button
+        className="back-to-journaling-btn" // Custom class for placement
+        onClick={() => navigate('/journaling')}
+      >
+        Back to Home
+      </button>
+
     </div>
   );
 };

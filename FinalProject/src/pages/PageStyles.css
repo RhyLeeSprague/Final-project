@@ -1,23 +1,29 @@
+
 .page-container {
-    text-align: center;
-    margin: 50px auto;
-    padding: 20px;
-    width: 80%;
-    max-width: 800px;
-    background: #D2B48c;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-  }
+  background-color: var(--background-color, #D2B48c); /* Default to tan or light */
+  color: #213547; /* Dark text for readability */
+  padding: 20px;
+  min-height: 100vh; /* Ensure full-screen height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
   
   .page-container h1 {
     font-size: 2.5rem;
     margin-bottom: 20px;
   }
   
-  .page-container p {
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-  }
+/* Error message styling */
+.page-container p {
+  font-size: 1rem;
+  margin-top: 10px;
+  color: #9c6e63;
+  font-weight: bold;
+}
   
   .journal-textarea {
     width: 100%;
@@ -75,16 +81,22 @@
     border-radius: 50%;
   }
 
-  /* Mood button styling */
+/* Emotion button styling for Moods page */
 .emotion-btn {
+  display: flex; /* Enable flexbox */
+  justify-content: center; /* Horizontally center the content */
+  align-items: center; /* Vertically center the content */
   width: 80px;
   height: 80px;
-  font-size: 14px;
-  color: #fff;
   border: none;
-  border-radius: 50%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
+  border-radius: 50%; /* Makes the button circular */
+  font-size: 14px;
+  font-weight: bold;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.3s, background-color 0.3s;
+  margin: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .emotion-btn:hover {
@@ -148,25 +160,164 @@
     box-sizing: border-box;
   }
   
-  .mood-happy .react-calendar__tile {
-    background-color: yellow;
-    color: black;
-  }
-  
-  .mood-sad .react-calendar__tile {
-    background-color: blue;
-    color: white;
-  }
-  
-  .mood-excited .react-calendar__tile {
-    background-color: red;
-    color: white;
-  }
-  
-  .mood-neutral .react-calendar__tile {
-    background-color: gray;
-    color: white;
-  }
+
+
+
+ /* CALENDAR STYLING */
+
+  /* General Calendar Styling */
+.calendar-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+/* Calendar Header */
+.react-calendar__navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  background-color: #f1f3f4;
+  border-radius: 8px;
+  padding: 10px 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.react-calendar__navigation button {
+  background-color: #fff;
+  border: 1px solid #d1d1d1;
+  color: #3c4043;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.react-calendar__navigation button:hover {
+  background-color: #e8eaed;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.react-calendar__navigation button:disabled {
+  color: #b3b3b3;
+  background-color: #f1f1f1;
+  cursor: not-allowed;
+}
+
+/* Calendar Days Header */
+.react-calendar__month-view__weekdays {
+  text-align: center;
+  font-weight: bold;
+  color: #5f6368;
+  padding: 10px 0;
+}
+
+.react-calendar__month-view__weekdays__weekday {
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+/* Calendar Day Tiles */
+.react-calendar__tile {
+  background-color: #fff;
+  border: none;
+  outline: none;
+  border-radius: 8px;
+  padding: 15px;
+  color: #3c4043;
+  font-size: 14px;
+  text-align: center;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.react-calendar__tile:hover {
+  background-color: #e8eaed;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.react-calendar__tile--now {
+  background-color: #fce8e6;
+  border: 1px solid #f28b82;
+  color: #d93025;
+  font-weight: bold;
+}
+
+.react-calendar__tile--active {
+  background-color: #cce8ff;
+  color: #1967d2;
+  font-weight: bold;
+  border: 1px solid #1967d2;
+}
+
+.react-calendar__tile--active:hover {
+  background-color: #acd7ff;
+}
+
+/* Calendar Other Month Dates */
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: #d1d1d1;
+  font-style: italic;
+}
+
+/* Mood Colors for Calendar Tiles */
+.mood-Happy .react-calendar__tile{
+  background-color: yellow !important;
+}
+
+.mood-Sad .react-calendar__tile{
+  background-color: blue !important;
+  color: white !important;
+}
+
+.mood-Excited .react-calendar__tile{
+  background-color: red !important;
+  color: white !important;
+}
+
+.mood-Neutral .react-calendar__tile{
+  background-color: gray !important;
+  color: white !important;
+}
+
+/* Footer (Optional for Styling Buttons) */
+.calendar-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.calendar-footer button {
+  background-color: #1a73e8;
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.calendar-footer button:hover {
+  background-color: #1766cc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.calendar-footer button:disabled {
+  background-color: #d1d1d1;
+  cursor: not-allowed;
+}
+
+
   
   canvas {
     margin-top: 20px;
@@ -183,8 +334,7 @@
   #emotion-wheel {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 20px;
   }
   
   .emotion-btn {
@@ -197,3 +347,157 @@
     cursor: pointer;
   }
   
+  /* Task Tracker Styling */
+.tracker-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tracker-table th,
+.tracker-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.tracker-table th {
+  background-color: #9c6e63;
+  color: #fff;
+}
+
+.tracker-table td button {
+  margin-right: 5px;
+}
+
+.task-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Void Page Styling */
+.void-messages {
+  margin-bottom: 20px;
+}
+
+.void-message {
+  color: #213547;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.black-hole-container {
+  position: relative;
+  margin: 20px auto;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 1) 70%, transparent 80%);
+  border-radius: 50%;
+  box-shadow: 0 0 30px 10px rgba(255, 255, 255, 0.2), 0 0 60px 20px rgba(255, 204, 0, 0.3);
+  overflow: hidden;
+  animation: spin 10s linear infinite;
+}
+
+.accretion-disk {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, transparent 50%, rgba(255, 69, 0, 0.7) 55%, rgba(255, 204, 0, 0.7) 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: spin-reverse 15s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-reverse {
+  from {
+    transform: rotate(360deg) translate(-50%, -50%);
+  }
+  to {
+    transform: rotate(0deg) translate(-50%, -50%);
+  }
+}
+
+.black-hole-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  color: white;
+  transform: translate(-50%, -50%);
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* Swirling text container */
+.swirling-text {
+  position: absolute;
+  width: 200px; /* Matches black hole's width */
+  height: 200px;
+  top: 50%; /* Center relative to black hole container */
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none; /* Prevent interaction */
+}
+
+.swirling-text p {
+  position: absolute;
+  font-size: 1rem;
+  color: white;
+  animation: swirl 3s linear forwards; /* Swirling animation */
+}
+
+@keyframes swirl {
+  0% {
+    transform: translate(100px, -100px) rotate(0deg); /* Start position */
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0px, 0px) rotate(720deg); /* End position */
+    opacity: 0;
+  }
+}
+
+/* BACK TO HOME BUTTON */
+
+.page-container {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  justify-content: space-between; /* Spread items: top and bottom */
+  align-items: center; /* Horizontally center content */
+  min-height: 100vh; /* Full height of the viewport */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.back-to-journaling-btn {
+  padding: 12px 24px;
+  font-size: 1rem;
+  background: #9c6e63; /* Earthy tone */
+  color: #fff; /* White text */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 20px; /* Add spacing above the button */
+  text-align: center;
+}
+
+.back-to-journaling-btn:hover {
+  background-color: #8a5b57; /* Slightly darker shade on hover */
+}

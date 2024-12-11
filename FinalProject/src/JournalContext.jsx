@@ -19,6 +19,7 @@ export const JournalProvider = ({ children }) => {
     <JournalContext.Provider
       value={{
         journalEntries,
+        setJournalEntries,
         addJournalEntry,
         moods,
         updateMood,

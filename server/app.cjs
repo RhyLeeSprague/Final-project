@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Sequelize, Model, DataTypes } = require('sequelize');
 const bcrypt = require('bcrypt');
@@ -7,6 +8,10 @@ const JWT_SECRET = 'wildcard'
 
 const app = express();
 const port = 3000;
+
+app.use(cors());
+app.use(express.json()); // JSON body parsing middleware
+
 
 // Create Sequelize instance
 const sequelize = new Sequelize({
@@ -278,15 +283,19 @@ app.post('/register', async (req, res) => {
 
 // Login route
 app.post('/login', async (req, res) => {
+  console.log('Request body:', req.body);
   const {email, password} = req.body;
 
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required' });
+  }
   // Log the incoming credentials for debugging
   console.log('Login attempt with email:', email);
 
   // User search by email
   const user = await User.findOne({ where: {email} });
   if (!user) {
-    console.log('User not found:', email);
+    console.log('User not found for email:', email);
     return res.status(400).json({ message: 'User not found'});
   }
 
@@ -309,6 +318,10 @@ app.get('/profile', authenticateToken, async (req, res) => {
     return res.status(404).json({ message: 'User not found'});
   }
   res.json({ name: user.name, email: user.email});
+});
+
+app.post('/guest-mode', (req, res) => {
+  res.status(200).json({ message: 'Guest mode activated' });
 });
 
 
